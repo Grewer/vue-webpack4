@@ -1,26 +1,31 @@
 # vue-webpack4
 
-> A Vue.js project
+> 时至今日(2018-7-11),vue-cli 任然为支持至webpack4,所以我自己来创建已个 vue 模板
+> 不过大致的原因我也能猜到,因为很多插件仍然是一个不稳定的点,比如我在创建中也遇到了,至今未有解决的方案
 
+## webpack 4 优点:
+总结来说就是 加快了 dev 模式下的编译速度,和 prod 模式下的打包速度
+还有 ` optimize.CommonsChunkPlugin` 会换成另一种写法
+还有一个比较小的优点,相信很多人都没说,就是他会压缩 es6 代码,也许很多人都会问🤔 我们不是打包为es5的代码吗,为什么要用到这个特性?
+
+这个原因我会在后面几篇博客中说明(￣▽￣)"
 
 ## 修改过程
 
-1. 使用最新的 webpack
+
+### 1.使用最新的 webpack  
 
 一键更新插件:
 ```bash
 npm i -D webpack@4.15.1 vue-loader@15.2.4 mini-css-extract-plugin html-webpack-plugin@3.2.0 webpack-cli@3.0.8 webpack-dev-server@3.1.4
 ```
 
-2. 修改 webpack.prod.conf.js
+### 2.修改 webpack.prod.conf.js  
 
 去除 `const ExtractTextPlugin = require('extract-text-webpack-plugin')`
-和
-
-
 添加 `const MiniCssExtractPlugin = require('mini-css-extract-plugin')`
 添加 `const VueLoaderPlugin = require('vue-loader/lib/plugin')`
-这两个也要加在 webpack.dev.conf.js
+VueLoaderPlugin也要加在 webpack.dev.conf.js
 
 如果你嫌麻烦,可以放在 webpack.base.conf.js 中
 
@@ -104,7 +109,7 @@ new VueLoaderPlugin()
 
 
 
-3. 修改build/utils.js
+### 3.修改build/utils.js  
 
 将
 `const ExtractTextPlugin = require('extract-text-webpack-plugin')
@@ -128,8 +133,14 @@ if (options.extract) {
 } 
 ```
 
+4.添加mode
+在 webpack.dev.conf.js 中 添加 `mode:'development',`
+同样的在 webpack.prod.conf.js 中添加 ` mode: 'production',`
+*具体可查看我之后给出的项目*
+
 ## build问题
-1.
+
+question:   
 ```js
 var outputName = compilation.mainTemplate.applyPluginsWaterfall('asset-path', outputOptions.filename, {
 ```
@@ -138,8 +149,9 @@ var outputName = compilation.mainTemplate.applyPluginsWaterfall('asset-path', ou
 npm install html-webpack-plugin@3.2.0 --save-dev
 ```
  
+---
 
-2.
+question:    
 ```bash
 DeprecationWarning: Tapable.plugin is deprecated. Use new API on `.hooks` instead
 ```
@@ -148,8 +160,9 @@ DeprecationWarning: Tapable.plugin is deprecated. Use new API on `.hooks` instea
 npm install --save-dev mini-css-extract-plugin
 ```
 
+---
 
-3. 
+question:  
 ```bash
 Module build failed (from ./node_modules/vue-loader/index.js):
 TypeError: Cannot read property 'vue' of undefined
@@ -176,6 +189,7 @@ plugins: [
 
 还有需要注意的是 webpack.base.conf.js 中的 loader 后缀不可省略
 
+---
 
 pug报错:
 解决: 使用最新的 `pug-html-loader`  
@@ -193,14 +207,32 @@ pug报错:
 解决:  
 `npm i -D postcss-loader@2.1.5`
 
-
-
+---
 
 ```bash
 (node:93005) DeprecationWarning: Tapable.plugin is deprecated. Use new API on `.hooks` instead
 ```
-该语句没有太大影响,仅仅是提现的作用
+该语句没有太大影响,仅仅是提醒的作用
 
+---
+
+我刚刚在引言里说的,至今未解决的问题,就在于异步组件块的css 上
+首先要清楚 现在css 也是和异步组件一样的异步加载,除非插件更新,改变这种模式
+但是,很多人都会觉得这种方法并不是很好,想要将 css 文件合并成一个,缺没法合并
+如果按我刚刚的配置来改,那么改出来的确实是会将css 合并但是,他会有副作用 ---> 会产生一个无用的chunk文件,并且他不能被删除,而且他会作为入口文件之一
+
+这个问题至今是仍然未解决,具体详情可以浏览该issue:
+<a href="https://github.com/webpack-contrib/mini-css-extract-plugin/issues/113" target="_block">https://github.com/webpack-contrib/mini-css-extract-plugin/issues/113</a>
+放上我的项目地址,如果有需要可以查看:
+<a href="https://github.com/Grewer/vue-webpack4" target="_block">https://github.com/Grewer/vue-webpack4</a>
+
+--- 
+
+总结一下,其实相对于有一点体量的项目来说,其实速度的加快并没有多少
+比如我之前项目经常是在30S左右,升级到webpack 4后,时间大概在25-32s左右
+文件的压缩有了一点效果,但是影响不是很多,比如之前 113K的文件 升级后 会压缩大概至 109K (╯▽╰)
+
+现在插件还未稳定下来,如果喜欢折腾的话可以试试,不然还是持观望为主,等官方升级为好😑
 
 ## Build Setup
 
