@@ -10,7 +10,6 @@
 一键更新插件:
 ```bash
 npm i -D webpack@4.15.1 vue-loader@15.2.4 mini-css-extract-plugin html-webpack-plugin@3.2.0 webpack-cli@3.0.8 webpack-dev-server@3.1.4
-
 ```
 
 2. 修改 webpack.prod.conf.js
@@ -87,11 +86,14 @@ new VueLoaderPlugin()
           name: "vendor",
           chunks: "all"
         },
-        app: {
-          name:'app',
-          chunks: 'async',
-          minChunks: 3
-        }
+        styles: {
+          name:'styles',
+          test: (m) => m.constructor.name === 'CssModule',
+          chunks: 'all',
+          minChunks: 1,
+          enforce: true,
+          euseExistingChunk: true
+         }
       }
     },
     runtimeChunk: {
@@ -126,14 +128,15 @@ if (options.extract) {
 } 
 ```
 
-### build问题
+## build问题
 1.
 ```js
- var outputName = compilation.mainTemplate.applyPluginsWaterfall('asset-path', outputOptions.filename, {
+var outputName = compilation.mainTemplate.applyPluginsWaterfall('asset-path', outputOptions.filename, {
 ```
-解决: ```bash
-      npm install html-webpack-plugin@3.2.0 --save-dev
-      ```
+解决:   
+```bash
+npm install html-webpack-plugin@3.2.0 --save-dev
+```
  
 
 2.
@@ -144,7 +147,6 @@ DeprecationWarning: Tapable.plugin is deprecated. Use new API on `.hooks` instea
 ```bash
 npm install --save-dev mini-css-extract-plugin
 ```
-替换 extract-text-webpack-plugin@next
 
 
 3. 
@@ -153,13 +155,12 @@ Module build failed (from ./node_modules/vue-loader/index.js):
 TypeError: Cannot read property 'vue' of undefined
 ```
 
-解决
-引用新的vue-loader
+解决: 引用新的vue-loader  
 ```bash
 npm i -D vue-loader@15.2.4
 
 ```
-prod.js添加
+prod.js添加  
 ```js
 const VueLoaderPlugin = require('vue-loader/lib/plugin');
 plugins: [
@@ -168,24 +169,8 @@ plugins: [
 ```
 
 
-4. 
-```bash
-/Users/admin/grewer/XXXXX/node_modules/mini-css-extract-plugin/dist/index.js:81
-    const resource = this._identifier.split('!').pop();
-                                      ^
 
-TypeError: Cannot read property 'split' of undefined
-```
-
-
-
-```bash
-(node:93005) DeprecationWarning: Tapable.plugin is deprecated. Use new API on `.hooks` instead
-```
-
-
-
-其他错误
+### 其他错误
 如 eslint 报错,则需要下载最新版本的eslint-loader
 `npm install eslint-loader@2.0.0 -D`
 
@@ -193,7 +178,7 @@ TypeError: Cannot read property 'split' of undefined
 
 
 pug报错:
-使用最新的 pug-html-loader
+解决: 使用最新的 `pug-html-loader`  
 ```js
 {
       test: /\.pug$/,
@@ -202,11 +187,20 @@ pug报错:
 ```
 
 
-警告;
+### 警告
 
 有关 postcss
-
+解决:  
 `npm i -D postcss-loader@2.1.5`
+
+
+
+
+```bash
+(node:93005) DeprecationWarning: Tapable.plugin is deprecated. Use new API on `.hooks` instead
+```
+该语句没有太大影响,仅仅是提现的作用
+
 
 ## Build Setup
 
